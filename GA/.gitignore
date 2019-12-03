@@ -3,3 +3,5 @@
 .classpath
 .project
 data.csv
+data1.csv
+*.csv
