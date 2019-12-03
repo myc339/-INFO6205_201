@@ -42,7 +42,7 @@ public class AppTest {
         int generation = 1;
         while (! (Boolean) pmt.invokePrivate("isTerminationConditionMet", generation, maxGenerations)) {
 
-            assertEquals(true, population.sortIndividualsByFitness(0) != null);
+            assertEquals(true, population.getFittest(0) != null);
             generation++;
         }
 

@@ -1,13 +1,19 @@
 package info6205.GA;
 
 public class Individual {
-   
+
     private int[] chromosome;
+    private static int[] maxchromosome;
     private int age;
     private double fitness = -1;
-    private static double maxfitness = -1;
+    private  static double maxfitness = -1;
     private boolean isDead = false;
-    
+
+    public Individual(int[] chromosome){
+        this.chromosome = chromosome;
+        this.age = 0;
+    }
+
     /*
      *  random create a individual
      * */
@@ -23,53 +29,61 @@ public class Individual {
             }
         }
     }
-    
+
     public int[] getChromosome(){
         return this.chromosome;
     }
     public int getAge(){
-    	return this.age;
+        return this.age;
     }
-    
+
     public void setAge(int age){
-    	this.age = age;
+        this.age = age;
     }
-  
+
     public boolean getisDead(){
-    	return this.isDead;
+        return this.isDead;
     }
-    
+
     public void setisDead(boolean isDead){
-    	this.isDead = isDead;
+        this.isDead = isDead;
     }
     public int getChromosomeLength(){
         return this.chromosome.length;
     }
-   
+
     public void setGene(int offset,int gene){
         this.chromosome[offset] = gene;
     }
-    
-    
+
+
     public int getGene(int offset){
         return this.chromosome[offset];
     }
-   
+
     public void setFitness(double fitness){
         this.fitness = fitness;
         if(maxfitness <= fitness){
-        	maxfitness = fitness;
+            maxfitness = fitness;
+            this.maxchromosome = this.chromosome;
         }
     }
-   
+
     public double getMaxFitness(){
-    	return this.maxfitness;
+        return this.maxfitness;
     }
     public double getFitness(){
         return this.fitness;
-    } 
+    }
 
-    @Override
+    public String toMaxString(){
+        String output = "";
+        for (int gene = 0; gene < this.maxchromosome.length; gene++) {
+            output +=this.maxchromosome[gene];
+        }
+        return output;
+    }
+
     public String toString(){
         String output = "";
         for (int gene = 0; gene < this.chromosome.length; gene++) {

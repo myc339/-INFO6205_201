@@ -5,18 +5,17 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 public class Population {
-	
+
     public Individual[] population;
-//    public double populationFitness=-1;
-   
+    public double populationFitness=-1;
+
     public Population(int populationSize){
         this.population = new Individual[populationSize];
     }
-    
-   /**
-    * @Param populationSize
-    * @Param chromosomeLength
-    * **/
+
+    /*
+     * （1）population size，（2）chromosome Length
+     * */
     public Population(int populationSize,int chromosomeLength){
         this.population = new Individual[populationSize];
         for (int individualCount = 0; individualCount < populationSize; individualCount++) {
@@ -24,65 +23,64 @@ public class Population {
             this.population[individualCount] = individual;
         }
     }
-    
+
     public Individual[] getIndividuals(){
         return this.population;
     }
+    /*
+     *  sort population by fitness with help of priorityQueue
+     * */
+    public Individual getFittest(int index){
 
-    /**
-     * get best individuals in groups
-     * @param index individuals serial number
-     * @return return best individuals when index is 0
-     */
-    public Individual sortIndividualsByFitness(int index){
-        
-    	PriorityQueue<Individual> pq = new PriorityQueue<Individual>(population.length,new Comparator<Individual>() {
+        PriorityQueue<Individual> qi = new PriorityQueue<Individual>(population.length,new Comparator<Individual>(){
 
-			@Override
-			public int compare(Individual o1, Individual o2) {
-				return (int) (o2.getFitness()-o1.getFitness());
-			}});
+            @Override
+            public int compare(Individual o1, Individual o2) {
+                return (int) (o2.getFitness()-o1.getFitness());
+            }});
 
-           
-         Individual[] Sorted_population = new Individual[index+1];
 
-         for(int i = 0; i < population.length; i++){
-             pq.add(population[i]);
-         }
-         
-    	 for(int j = 0; j <= index; j++){
-    		 Sorted_population[j] = pq.poll();
-    	 }
-         
-         return Sorted_population[index];
-     }
-    
-//    public void setPopulationFitness(double populationFitness) {
-//        this.populationFitness = populationFitness;
-//    }
-    
+        Individual[] population_Sort = new Individual[index+1];
+
+        for(int i = 0; i < population.length; i++){
+            qi.add(population[i]);
+        }
+
+        for(int j = 0; j <= index; j++){
+            population_Sort[j] = qi.poll();
+        }
+
+        return population_Sort[index];
+    }
+
+    public double getPopulationFitness() {
+        return populationFitness;
+    }
+
+
+    public void setPopulationFitness(double populationFitness) {
+        this.populationFitness = populationFitness;
+    }
+
     public int size(){
         return this.population.length;
     }
-    
-    public Individual setIndividual(int serialNumber,Individual individual){
-        return population[serialNumber] = individual;
-    }
-    
-    public Individual getIndividual(int serialNumber){
-        return population[serialNumber];
+
+    public Individual setIndividual(int offset,Individual individual){
+        return population[offset] = individual;
     }
 
-    /**
-     * shuffle groups
-     */
+    public Individual getIndividual(int offset){
+        return population[offset];
+    }
+
     public void shuffle() {
-        Random rand = new Random();
+        Random rnd = new Random();
         for (int i = population.length - 1; i > 0; i--) {
-            int index = rand.nextInt(i + 1);
-            Individual individual = population[index];
+            int index = rnd.nextInt(i + 1);
+            Individual a = population[index];
             population[index] = population[i];
-            population[i] = individual;
+            population[i] = a;
         }
     }
 }

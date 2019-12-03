@@ -5,8 +5,7 @@ import Maze.MazePreparation;
 import java.util.ArrayList;
 
 public class Goat {
-    // ( 0 ,-1) (+1, 0) (0,+1) (-1,0)
-    private enum Direction{north, east, south, west};
+    private enum Direction{NORTH,EAST,SOUTH,WEST};
     private int xPosition;
     private int yPosition;
     private Direction heading;
@@ -14,48 +13,45 @@ public class Goat {
     int moves;
     private int sensorVal;
     private final int sensorActions[];
-    private MazePreparation mazePreparation;
+    private MazePreparation maze;
     private ArrayList<int[]> route;
-
-    public Goat(int[] gene, MazePreparation mazePreparation, int maxMoves){
+    public Goat(int[] gene, MazePreparation maze, int maxMoves){
         //the parameter gene determine actions
         this.sensorActions = this.calcSensorActions(gene);
-        this.mazePreparation = mazePreparation;
-        int startPos[] = this.mazePreparation.getStartPosition();
+        this.maze = maze;
+        int startPos[] = this.maze.getStartPosition();
         this.xPosition = startPos[0];
         this.yPosition = startPos[1];
         this.sensorVal = -1;
-        this.heading = Direction.east;
+        this.heading = Direction.EAST;
         this.maxMoves = maxMoves;
         this.moves = 0;
         this.route = new ArrayList<int[]>();
         this.route.add(startPos);
     }
-    public void FitnessCalculate(){
+    public void run(){
         while(true){
-
+            this.moves++;
             //when getNextAction()==0 means meeting the end of road. 有问题，一共四种行为1移动2顺时针旋转3逆时针旋转，0直接结束
-             if (this.getNextAction() == 0) {
+            if (this.getNextAction() == 0) {
                 return;
             }
-             //4 represent reach exit
-            if (this.mazePreparation.getPositionValue(this.xPosition, this.yPosition) == 4) {
+            //4 is exit
+            if (this.maze.getPositionValue(this.xPosition, this.yPosition) == 4) {
                 return;
             }
             //keep moving
             if (this.moves > this.maxMoves) {
                 return;
             }
-            this.moves++;
-            this.makeNextAction();    
+            this.makeNextAction();
         }
     }
     private int[] calcSensorActions(int[] gene){
-        //2 bit as one gene 60 pairs
+        //2 gene determine 1 action
         int numActions = (int)gene.length/2;
-//        System.out.println;
         int sensorActions[] = new int[numActions];
-        /// 00 -> 0  01 -> 1 10 -> 2 11-> 3
+
         for (int sensorValue = 0; sensorValue < numActions; sensorValue++){
             int sensorAction = 0;
             if (gene[sensorValue*2] == 1){
@@ -64,125 +60,134 @@ public class Goat {
             if (gene[(sensorValue*2)+1] == 1){
                 sensorAction += 1;
             }
-            
+
             sensorActions[sensorValue] = sensorAction;
         }
-         return sensorActions;
+        return sensorActions;
     }
-    
+
     public void makeNextAction(){
         //when 1, move action
-//        for( int action :sensorActions) {
-            if (this.getNextAction() == 1) {
-                int currentX = this.xPosition;
-                int currentY = this.yPosition;
-                //check direction
-                if (Direction.north == this.heading) {
-                    this.yPosition += -1;
-                    if (this.yPosition < 0) {
-                        this.yPosition = 0;
-                    }
-                } else if (Direction.east == this.heading) {
-                    this.xPosition += 1;
-                    if (this.xPosition > this.mazePreparation.getMaxX()) {
-                        this.xPosition = this.mazePreparation.getMaxX();
-                    }
-                } else if (Direction.south == this.heading) {
-                    this.yPosition += 1;
-                    if (this.yPosition > this.mazePreparation.getMaxY()) {
-                        this.yPosition = this.mazePreparation.getMaxY();
-                    }
-                } else if (Direction.west == this.heading) {
-                    this.xPosition += -1;
-                    if (this.xPosition < 0) {
-                        this.xPosition = 0;
-                    }
-                }
-                //check wall, then confirm move
-                if (this.mazePreparation.isWall(this.xPosition, this.yPosition)) {
-                    this.xPosition = currentX;
-                    this.yPosition = currentY;
-                } else {
-                    if (currentX != this.xPosition || currentY != this.yPosition) {
-                        this.route.add(this.getPosition());
-                    }
+        if (this.getNextAction() == 1) {
+            int currentX = this.xPosition;
+            int currentY = this.yPosition;
+            //check direction
+            if (Direction.NORTH == this.heading) {
+                this.yPosition += -1;
+                if (this.yPosition < 0) {
+                    this.yPosition = 0;
                 }
             }
-            //clockwise rotation
-            else if (this.getNextAction() == 2) {
-                if (Direction.north == this.heading) {
-                    this.heading = Direction.east;
-                } else if (Direction.east == this.heading) {
-                    this.heading = Direction.south;
-                } else if (Direction.south == this.heading) {
-                    this.heading = Direction.west;
-                } else if (Direction.west == this.heading) {
-                    this.heading = Direction.north;
+            else if (Direction.EAST == this.heading) {
+                this.xPosition += 1;
+                if (this.xPosition > this.maze.getMaxX()) {
+                    this.xPosition = this.maze.getMaxX();
                 }
             }
-            //counterclockwise rotation
-            else if (this.getNextAction() == 3) {
-                if (Direction.north == this.heading) {
-                    this.heading = Direction.west;
-                } else if (Direction.east == this.heading) {
-                    this.heading = Direction.north;
-                } else if (Direction.south == this.heading) {
-                    this.heading = Direction.east;
-                } else if (Direction.west == this.heading) {
-                    this.heading = Direction.south;
+            else if (Direction.SOUTH == this.heading) {
+                this.yPosition += 1;
+                if (this.yPosition > this.maze.getMaxY()) {
+                    this.yPosition = this.maze.getMaxY();
                 }
             }
-            //make sensorVal default for next getNextAction()
-            this.sensorVal = -1;
-//        }
+            else if (Direction.WEST == this.heading) {
+                this.xPosition += -1;
+                if (this.xPosition < 0) {
+                    this.xPosition = 0;
+                }
+            }
+            //check wall, then confirm move
+            if (this.maze.isWall(this.xPosition, this.yPosition) == true) {
+                this.xPosition = currentX;
+                this.yPosition = currentY;
+            }
+            else {
+                if(currentX != this.xPosition || currentY != this.yPosition) {
+                    this.route.add(this.getPosition());
+                }
+            }
+        }
+        //clockwise rotation
+        else if(this.getNextAction() == 2) {
+            if (Direction.NORTH == this.heading) {
+                this.heading = Direction.EAST;
+            }
+            else if (Direction.EAST == this.heading) {
+                this.heading = Direction.SOUTH;
+            }
+            else if (Direction.SOUTH == this.heading) {
+                this.heading = Direction.WEST;
+            }
+            else if (Direction.WEST == this.heading) {
+                this.heading = Direction.NORTH;
+            }
+        }
+        //counterclockwise rotation
+        else if(this.getNextAction() == 3) {
+            if (Direction.NORTH == this.heading) {
+                this.heading = Direction.WEST;
+            }
+            else if (Direction.EAST == this.heading) {
+                this.heading = Direction.NORTH;
+            }
+            else if (Direction.SOUTH == this.heading) {
+                this.heading = Direction.EAST;
+            }
+            else if (Direction.WEST == this.heading) {
+                this.heading = Direction.SOUTH;
+            }
+        }
+        //make sensorVal default for next getNextAction()
+        this.sensorVal = -1;
     }
-    
-    public int getNextAction() {
 
-        return this.sensorActions[getSensorValue()];
+    public int getNextAction() {
+        return this.sensorActions[this.getSensorValue()];
     }
-    
+
     public int getSensorValue(){
         if (this.sensorVal > -1) {
             return this.sensorVal;
         }
-                
+
         boolean frontSensor, frontLeftSensor, frontRightSensor, leftSensor, rightSensor, backSensor;
-        if (this.getHeading() == Direction.north) {
-            frontSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition-1);
-            frontLeftSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition-1);
-            frontRightSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition-1);
-            leftSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition);
-            rightSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition);
-            backSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition+1);
+        frontSensor = frontLeftSensor = frontRightSensor = leftSensor = rightSensor = backSensor = false;
+
+        if (this.getHeading() == Direction.NORTH) {
+            frontSensor = this.maze.isWall(this.xPosition, this.yPosition-1);
+            frontLeftSensor = this.maze.isWall(this.xPosition-1, this.yPosition-1);
+            frontRightSensor = this.maze.isWall(this.xPosition+1, this.yPosition-1);
+            leftSensor = this.maze.isWall(this.xPosition-1, this.yPosition);
+            rightSensor = this.maze.isWall(this.xPosition+1, this.yPosition);
+            backSensor = this.maze.isWall(this.xPosition, this.yPosition+1);
         }
-        else if (this.getHeading() == Direction.east) {
-            frontSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition);
-            frontLeftSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition-1);
-            frontRightSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition+1);
-            leftSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition-1);
-            rightSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition+1);
-            backSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition);
+        else if (this.getHeading() == Direction.EAST) {
+            frontSensor = this.maze.isWall(this.xPosition+1, this.yPosition);
+            frontLeftSensor = this.maze.isWall(this.xPosition+1, this.yPosition-1);
+            frontRightSensor = this.maze.isWall(this.xPosition+1, this.yPosition+1);
+            leftSensor = this.maze.isWall(this.xPosition, this.yPosition-1);
+            rightSensor = this.maze.isWall(this.xPosition, this.yPosition+1);
+            backSensor = this.maze.isWall(this.xPosition-1, this.yPosition);
         }
-        else if (this.getHeading() == Direction.south) {
-            frontSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition+1);
-            frontLeftSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition+1);
-            frontRightSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition+1);
-            leftSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition);
-            rightSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition);
-            backSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition-1);
+        else if (this.getHeading() == Direction.SOUTH) {
+            frontSensor = this.maze.isWall(this.xPosition, this.yPosition+1);
+            frontLeftSensor = this.maze.isWall(this.xPosition+1, this.yPosition+1);
+            frontRightSensor = this.maze.isWall(this.xPosition-1, this.yPosition+1);
+            leftSensor = this.maze.isWall(this.xPosition+1, this.yPosition);
+            rightSensor = this.maze.isWall(this.xPosition-1, this.yPosition);
+            backSensor = this.maze.isWall(this.xPosition, this.yPosition-1);
         }
         else {
-            frontSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition); //left
-            frontLeftSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition+1); // left-down
-            frontRightSensor = this.mazePreparation.isWall(this.xPosition-1, this.yPosition-1); // left-up
-            leftSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition+1); // down
-            rightSensor = this.mazePreparation.isWall(this.xPosition, this.yPosition-1); // up
-            backSensor = this.mazePreparation.isWall(this.xPosition+1, this.yPosition);  // right
+            frontSensor = this.maze.isWall(this.xPosition-1, this.yPosition);
+            frontLeftSensor = this.maze.isWall(this.xPosition-1, this.yPosition+1);
+            frontRightSensor = this.maze.isWall(this.xPosition-1, this.yPosition-1);
+            leftSensor = this.maze.isWall(this.xPosition, this.yPosition+1);
+            rightSensor = this.maze.isWall(this.xPosition, this.yPosition-1);
+            backSensor = this.maze.isWall(this.xPosition+1, this.yPosition);
         }
-                
+
         int sensorVal = 0;
-        
+
         if (frontSensor == true) {
             sensorVal += 1;
         }
@@ -206,8 +211,8 @@ public class Goat {
 
         return sensorVal;
     }
-    
-    public ArrayList<int[]> getRoute(){       
+
+    public ArrayList<int[]> getRoute(){
         return this.route;
     }
     public int[] getPosition(){
@@ -215,15 +220,15 @@ public class Goat {
     }
     private Direction getHeading(){
         return this.heading;
-     }
-//    public String printRoute() {
-//        String route = "";
-//
-//        for (Object routeStep : this.route) {
-//            int step[] = (int[]) routeStep;
-//            route += "{" + step[0] + "," + step[1] + "}";
-//        }
-//        System.out.println(route);
-//        return route;
-//    }
+    }
+    public String printRoute() {
+        String route = "";
+
+        for (Object routeStep : this.route) {
+            int step[] = (int[]) routeStep;
+            route += "{" + step[0] + "," + step[1] + "}";
+        }
+        System.out.println(route);
+        return route;
+    }
 }

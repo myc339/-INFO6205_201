@@ -10,55 +10,53 @@ public class Main {
     public static int maxGenerations = 1000;
     
     public static void main(String[] args) {
-        int len=50;
-        int height=50;
-        MazePreparation mazePreparation = new MazePreparation(len,height);
+        int len=30;
+        int height=30;
+        MazePreparation mazePreparation = new MazePreparation();
+        int  TotalLen =mazePreparation.getMazePathLen();
 
-        System.out.println( MazePreparation.getMazePathLen()*3);
-        GeneticAlgorithm ga = new GeneticAlgorithm(1000, 0.1, 10, 0.2, 0.8, MazePreparation.getMazePathLen()*3);
-        //first  generation
-        Population population = ga.initPopulation(64*2);
-        
+        GeneticAlgorithm ga = new GeneticAlgorithm(1000, 0.05, 10, 0.25, 0.8, 300);
+        Population population = ga.initPopulation(128);
 
-         ga.evalPopulation(population, mazePreparation);
-        List<String> dataList = new ArrayList<String>();
+
+        ga.evalPopulation(population, mazePreparation);
+
         int generation =1;
 
         // evaluation
         while (ga.isTerminationConditionMet(generation, maxGenerations) == false) {
-            
-            Individual fittest = population.sortIndividualsByFitness(0);
 
-            dataList.add(String.valueOf(fittest.getFitness() / (1.0*MazePreparation.getMazePathLen())));
-            System.out.println( fittest.getFitness() / (1.0*MazePreparation.getMazePathLen()) );
+            Individual fittest = population.getFittest(0);
+
+            System.out.println( fittest.getMaxFitness()/(TotalLen*1.0)  );
 
             //+ fittest.toString()
-            
+
             //Age +
             ga.addAge(population);
             //dead
             population = ga.deadPopulation(population);
 
-            // crossover mutation rate is 0.2 cross 60 pairs chromosomes
+            // crossover
             population = ga.crossoverPopulation(population);
 
             // mutation
-//            population = ga.mutatePopulation(population);
+            population = ga.mutatePopulation(population);
 
-            
+
             ga.evalPopulation(population, mazePreparation);
 
             //next generation
             generation++;
         }
-       System.out.println("create success?"+ String.valueOf(exportCsv(new File("data.csv"),dataList) ==true));
 
         System.out.println("Stopped after " + maxGenerations + " generations.");
-        Individual optimalOne = population.sortIndividualsByFitness(0);
-        System.out.println("Best solution (" + optimalOne.getMaxFitness()/ (1.0*MazePreparation.getMazePathLen()) + "): "
-                + optimalOne.toString());
+        Individual fittest = population.getFittest(0);
+        System.out.println("Best solution (" + fittest.getMaxFitness()/(TotalLen*1.0) + "): "
+                + fittest.toString());
 
     }
+
     public static boolean exportCsv(File file, List<String> dataList) {
         boolean isSucess = false;
 
