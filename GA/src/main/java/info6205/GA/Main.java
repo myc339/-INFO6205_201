@@ -3,6 +3,7 @@ package info6205.GA;
 import Maze.MazePreparation;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -20,7 +21,7 @@ public class Main {
 
 
         ga.evalPopulation(population, mazePreparation);
-
+        ArrayList<String> dataList= new ArrayList<String>();
         int generation =1;
 
         // evaluation
@@ -28,8 +29,8 @@ public class Main {
 
             Individual fittest = population.getFittest(0);
 
-            System.out.println( fittest.getMaxFitness()/(TotalLen*1.0)  );
-
+            System.out.println( fittest.getMaxFitness()  );
+            dataList.add(String.valueOf(fittest.getMaxFitness()));
             //+ fittest.toString()
 
             //Age +
@@ -49,7 +50,7 @@ public class Main {
             //next generation
             generation++;
         }
-
+        System.out.println("create success?"+ String.valueOf(exportCsv(new File("data.csv"),dataList) ==true));
         System.out.println("Stopped after " + maxGenerations + " generations.");
         Individual fittest = population.getFittest(0);
         System.out.println("Best solution (" + fittest.getMaxFitness()/(TotalLen*1.0) + "): "
