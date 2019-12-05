@@ -5,6 +5,7 @@
 
 | Name        | NEU ID    | 
 
+| Yumeng Chen | 001409547 |
+
 | Dezhi Yang  | 001447703 |
 
-| Yumeng Chen | 001409547 |
